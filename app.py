@@ -125,3 +125,18 @@ HTML_PAGE = """<!DOCTYPE html>
       padding-top: 1.25rem;
       border-top: 1px solid var(--border);
       display: none;
+    }
+    #out.visible { display: block; }
+    .answer { white-space: pre-wrap; line-height: 1.5; }
+    .answer.refuse { color: var(--refuse); }
+    .hits { margin-top: 1rem; display: grid; gap: 0.75rem; }
+    .hit {
+      padding: 0.75rem 0.9rem;
+      border-left: 3px solid var(--accent);
+      background: rgba(16, 26, 44, 0.7);
+      font-size: 0.9rem;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .meta { color: #9ab0c8; font-size: 0.8rem; margin-bottom: 0.35rem; }
+    .err { color: var(--refuse); margin-top: 1rem; }
