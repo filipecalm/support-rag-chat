@@ -19,9 +19,10 @@ API: `POST /api/ask` with `{ "q": "..." }`
 
 | Layer | Choice |
 | --- | --- |
-| CLI / core | Python 3.11+ |
+| API / UI | FastAPI (`app.py`) — Vercel Python entrypoint |
+| CLI | `ask.py` (same retrieval + eval) |
 | Retrieval | TF-IDF (default) or Gemini embeddings |
-| LLM | Gemini lab key (optional; `--no-llm` still shows retrieval) |
+| LLM | Gemini lab key (optional; `--no-llm` / `no_llm: true` still shows retrieval) |
 | Corpus | Markdown files under `corpus/` |
 
 ## Architecture
