@@ -25,3 +25,16 @@ class Hit(BaseModel):
     source: str
     text: str
 
+
+class AskResponse(BaseModel):
+    answer: str
+    refused: bool
+    hits: list[Hit]
+    retriever: str
+
+
+@app.get("/api/health")
+def health():
+    return {"ok": True}
+
+
