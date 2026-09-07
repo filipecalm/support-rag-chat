@@ -81,3 +81,18 @@ HTML_PAGE = """<!DOCTYPE html>
       --border: #243044;
       --refuse: #f0a0a0;
     }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: radial-gradient(1200px 600px at 10% -10%, #152238, var(--bg));
+      color: var(--fg);
+    }
+    main {
+      max-width: 42rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.25rem 4rem;
+    }
+    h1 { font-size: 1.6rem; margin: 0 0 0.35rem; letter-spacing: -0.02em; }
+    .lead { color: #9ab0c8; margin: 0 0 1.5rem; line-height: 1.45; }
