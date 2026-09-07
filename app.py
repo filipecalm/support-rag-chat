@@ -110,3 +110,18 @@ HTML_PAGE = """<!DOCTYPE html>
     }
     .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     label { font-size: 0.85rem; color: #9ab0c8; display: flex; gap: 0.4rem; align-items: center; }
+    button {
+      border: 0;
+      border-radius: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      background: var(--accent);
+      color: #061018;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    #out {
+      margin-top: 1.5rem;
+      padding-top: 1.25rem;
+      border-top: 1px solid var(--border);
+      display: none;
