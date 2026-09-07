@@ -53,6 +53,13 @@ python ask.py --eval --no-llm
 uvicorn app:app --reload
 ```
 
+## Deploy (Vercel)
+
+Point the Vercel project at **this** repo (`filipecalm/support-rag-chat`), not `docs`.  
+Root Directory: repo root. Framework: Python — entrypoint is `app.py` (`app`).
+
+Set env: `GEMINI_API_KEY` (lab key). Without it, use the UI checkbox “retrieval only”.
+
 ## What recruiters should notice
 
 - Citation required on every answer
