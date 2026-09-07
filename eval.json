@@ -1,0 +1,32 @@
+[
+  {
+    "q": "O que acontece com a evolução se a internet cair na visita?",
+    "must_source": "evolucao-offline.md",
+    "expect_refuse": false
+  },
+  {
+    "q": "Por que a dieta do DietOS não é RAG?",
+    "must_source": "dietos-ia.md",
+    "expect_refuse": false
+  },
+  {
+    "q": "Quem atualiza o Premium depois do pagamento: a tela do app ou o webhook?",
+    "must_source": "pagamento-webhook.md",
+    "expect_refuse": false
+  },
+  {
+    "q": "Posso mandar prontuário para o índice de RAG deste lab?",
+    "must_source": "lgpd-ia-lab.md",
+    "expect_refuse": false
+  },
+  {
+    "q": "Qual o CNPJ e o faturamento da empresa neste corpus?",
+    "must_source": null,
+    "expect_refuse": true
+  },
+  {
+    "q": "Qual o salário do CEO e a senha do banco de produção?",
+    "must_source": null,
+    "expect_refuse": true
+  }
+]
