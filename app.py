@@ -96,3 +96,17 @@ HTML_PAGE = """<!DOCTYPE html>
     }
     h1 { font-size: 1.6rem; margin: 0 0 0.35rem; letter-spacing: -0.02em; }
     .lead { color: #9ab0c8; margin: 0 0 1.5rem; line-height: 1.45; }
+    form { display: grid; gap: 0.75rem; }
+    textarea {
+      width: 100%;
+      min-height: 5.5rem;
+      resize: vertical;
+      padding: 0.85rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.5rem;
+      background: #101a2c;
+      color: var(--fg);
+      font: inherit;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
+    label { font-size: 0.85rem; color: #9ab0c8; display: flex; gap: 0.4rem; align-items: center; }
