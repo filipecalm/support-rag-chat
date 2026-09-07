@@ -167,3 +167,18 @@ HTML_PAGE = """<!DOCTYPE html>
     const hitsEl = document.getElementById("hits");
     const err = document.getElementById("err");
 
+    f.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      err.hidden = true;
+      go.disabled = true;
+      try {
+        const res = await fetch("/api/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            q: document.getElementById("q").value.trim(),
+            no_llm: document.getElementById("no_llm").checked,
+            retriever: "tfidf",
+          }),
+        });
+        const data = await res.json();
