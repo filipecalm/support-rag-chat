@@ -4,10 +4,6 @@
 
 Not a generic ChatGPT wrapper. Answers only from a versioned knowledge base. If the answer is not in the corpus, the bot refuses.
 
-## Problem
-
-Support teams answer the same policy and process questions every day. Dumping the whole handbook into a prompt invents answers. This project retrieves relevant chunks first, then generates only from those chunks, and refuses when retrieval is weak.
-
 ## Demo
 
 | Action | Result |
@@ -16,13 +12,17 @@ Support teams answer the same policy and process questions every day. Dumping th
 | Ask something outside the corpus | Explicit refusal — no hallucination |
 | Run eval suite | Hit / refusal scores printed |
 
+Local UI: `uvicorn app:app --reload` → http://127.0.0.1:8000  
+API: `POST /api/ask` with `{ "q": "..." }`
+
 ## Stack
 
 | Layer | Choice |
 | --- | --- |
-| CLI / core | Python 3.11+ |
+| API / UI | FastAPI (`app.py`) — Vercel Python entrypoint |
+| CLI | `ask.py` (same retrieval + eval) |
 | Retrieval | TF-IDF (default) or Gemini embeddings |
-| LLM | Gemini lab key (optional; `--no-llm` still shows retrieval) |
+| LLM | Gemini lab key (optional; `--no-llm` / `no_llm: true` still shows retrieval) |
 | Corpus | Markdown files under `corpus/` |
 
 ## Architecture
@@ -49,7 +49,16 @@ copy .env.example .env
 python ask.py "Por que a dieta do DietOS não é RAG?"
 python ask.py --no-llm "Quem atualiza o Premium depois do pagamento?"
 python ask.py --eval --no-llm
+
+uvicorn app:app --reload
 ```
+
+## Deploy (Vercel)
+
+Point the Vercel project at **this** repo (`filipecalm/support-rag-chat`), not `docs`.  
+Root Directory: repo root. Framework: Python — entrypoint is `app.py` (`app`).
+
+Set env: `GEMINI_API_KEY` (lab key). Without it, use the UI checkbox “retrieval only”.
 
 ## What recruiters should notice
 
