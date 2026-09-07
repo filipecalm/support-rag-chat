@@ -140,3 +140,16 @@ HTML_PAGE = """<!DOCTYPE html>
     }
     .meta { color: #9ab0c8; font-size: 0.8rem; margin-bottom: 0.35rem; }
     .err { color: var(--refuse); margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Support RAG Chat</h1>
+    <p class="lead">Answers only from the versioned corpus. Weak retrieval leads to explicit refusal.</p>
+    <form id="f">
+      <textarea id="q" required placeholder="Ask something in the FAQ..."></textarea>
+      <div class="row">
+        <label><input type="checkbox" id="no_llm" /> retrieval only (--no-llm)</label>
+        <button type="submit" id="go">Ask</button>
+      </div>
+    </form>
