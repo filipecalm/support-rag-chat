@@ -38,3 +38,16 @@ def health():
     return {"ok": True}
 
 
+@app.post("/api/ask", response_model=AskResponse)
+def ask(body: AskRequest):
+    try:
+        hits, text = answer(body.q, body.retriever, body.no_llm, body.k)
+    except SystemExit as exc:
+        raise HTTPException(status_code=500, detail=str(exc) or "corpus error") from exc
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+    floor = min_score(body.retriever)
+    best = hits[0][0] if hits else 0.0
+    refused = "RECUSA" in text.upper() or best < floor
+
