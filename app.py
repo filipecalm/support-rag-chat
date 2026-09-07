@@ -153,3 +153,17 @@ HTML_PAGE = """<!DOCTYPE html>
         <button type="submit" id="go">Ask</button>
       </div>
     </form>
+    <p class="err" id="err" hidden></p>
+    <section id="out">
+      <div class="answer" id="answer"></div>
+      <div class="hits" id="hits"></div>
+    </section>
+  </main>
+  <script>
+    const f = document.getElementById("f");
+    const go = document.getElementById("go");
+    const out = document.getElementById("out");
+    const answerEl = document.getElementById("answer");
+    const hitsEl = document.getElementById("hits");
+    const err = document.getElementById("err");
+
