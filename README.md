@@ -49,6 +49,8 @@ copy .env.example .env
 python ask.py "Por que a dieta do DietOS não é RAG?"
 python ask.py --no-llm "Quem atualiza o Premium depois do pagamento?"
 python ask.py --eval --no-llm
+
+uvicorn app:app --reload
 ```
 
 ## What recruiters should notice
