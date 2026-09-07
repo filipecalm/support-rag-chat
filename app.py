@@ -66,3 +66,18 @@ def ask(body: AskRequest):
 def home():
     return HTML_PAGE
 
+
+HTML_PAGE = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Support RAG Chat</title>
+  <style>
+    :root {
+      --bg: #0b1220;
+      --fg: #e8eef7;
+      --accent: #3d8bfd;
+      --border: #243044;
+      --refuse: #f0a0a0;
+    }
