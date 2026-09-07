@@ -51,3 +51,18 @@ def ask(body: AskRequest):
     best = hits[0][0] if hits else 0.0
     refused = "RECUSA" in text.upper() or best < floor
 
+    return AskResponse(
+        answer=text,
+        refused=refused,
+        hits=[
+            Hit(score=score, source=ch["source"], text=ch["text"])
+            for score, ch in hits
+        ],
+        retriever=body.retriever,
+    )
+
+
+@app.get("/", response_class=HTMLResponse)
+def home():
+    return HTML_PAGE
+
