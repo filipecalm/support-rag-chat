@@ -11,3 +11,17 @@ app = FastAPI(
     description="FAQ RAG with citations and refusal - not a ChatGPT wrapper.",
     version="0.1.0",
 )
+
+
+class AskRequest(BaseModel):
+    q: str = Field(min_length=1, max_length=2000)
+    retriever: str = Field(default="tfidf", pattern="^(tfidf|embed)$")
+    no_llm: bool = False
+    k: int = Field(default=3, ge=1, le=10)
+
+
+class Hit(BaseModel):
+    score: float
+    source: str
+    text: str
+
