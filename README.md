@@ -4,10 +4,6 @@
 
 Not a generic ChatGPT wrapper. Answers only from a versioned knowledge base. If the answer is not in the corpus, the bot refuses.
 
-## Problem
-
-Support teams answer the same policy and process questions every day. Dumping the whole handbook into a prompt invents answers. This project retrieves relevant chunks first, then generates only from those chunks, and refuses when retrieval is weak.
-
 ## Demo
 
 | Action | Result |
