@@ -182,3 +182,17 @@ HTML_PAGE = """<!DOCTYPE html>
           }),
         });
         const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || res.statusText);
+        answerEl.textContent = data.answer;
+        answerEl.classList.toggle("refuse", data.refused);
+        hitsEl.innerHTML = data.hits.map((h) =>
+          `<article class="hit"><div class="meta">${h.source} · score ${h.score.toFixed(3)}</div>${escapeHtml(h.text)}</article>`
+        ).join("");
+        out.classList.add("visible");
+      } catch (x) {
+        err.textContent = String(x.message || x);
+        err.hidden = false;
+      } finally {
+        go.disabled = false;
+      }
+    });
