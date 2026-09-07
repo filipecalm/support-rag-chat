@@ -12,6 +12,9 @@ Not a generic ChatGPT wrapper. Answers only from a versioned knowledge base. If 
 | Ask something outside the corpus | Explicit refusal — no hallucination |
 | Run eval suite | Hit / refusal scores printed |
 
+Local UI: `uvicorn app:app --reload` → http://127.0.0.1:8000  
+API: `POST /api/ask` with `{ "q": "..." }`
+
 ## Stack
 
 | Layer | Choice |
