@@ -42,12 +42,16 @@ def chunk_text(text: str) -> list[str]:
     return [p for p in parts if p]
 
 
-def load_chunks() -> list[dict]:
+def load_chunks(language: str = "pt") -> list[dict]:
+    if language not in {"pt", "en"}:
+        raise ValueError("language must be 'pt' or 'en'")
+    corpus_dir = CORPUS if language == "pt" else CORPUS / "en"
     chunks = []
-    for path in sorted(CORPUS.glob("*.md")):
+    for path in sorted(corpus_dir.glob("*.md")):
         raw = path.read_text(encoding="utf-8")
         for n, piece in enumerate(chunk_text(raw)):
-            chunks.append({"id": f"{path.name}#{n}", "source": path.name, "text": piece})
+            source = path.relative_to(CORPUS).as_posix()
+            chunks.append({"id": f"{source}#{n}", "source": source, "text": piece})
     if not chunks:
         raise SystemExit("corpus/ vazio")
     return chunks
@@ -138,29 +142,39 @@ def format_hits(hits: list[tuple[float, dict]]) -> str:
     return "\n\n---\n\n".join(lines)
 
 
-def generate(query: str, hits: list[tuple[float, dict]], client, retriever: str) -> str:
+def generate(query: str, hits: list[tuple[float, dict]], client, retriever: str, language: str = "pt") -> str:
     floor = min_score(retriever)
     best = hits[0][0] if hits else 0.0
     if best < floor:
+        if language == "en":
+            return "REFUSAL: not found in the knowledge base (low score). I won't make it up."
         return "RECUSA: não está na base de conhecimento (score baixo). Não vou inventar."
     ctx = format_hits(hits)
-    prompt = (
-        "Responda só com o contexto abaixo. Cite o nome do arquivo. "
-        "Se o contexto não responder, diga exatamente: RECUSA: não está na base.\n\n"
-        f"CONTEXTO:\n{ctx}\n\nPERGUNTA: {query}"
-    )
+    if language == "en":
+        prompt = (
+            "Answer only using the context below. Reply in English and cite the source filename. "
+            "If the context does not answer the question, start exactly with: REFUSAL: not in the knowledge base.\n\n"
+            f"CONTEXT:\n{ctx}\n\nQUESTION: {query}"
+        )
+    else:
+        prompt = (
+            "Responda só com o contexto abaixo. Cite o nome do arquivo. "
+            "Se o contexto não responder, diga exatamente: RECUSA: não está na base.\n\n"
+            f"CONTEXTO:\n{ctx}\n\nPERGUNTA: {query}"
+        )
     if client is None:
-        return f"(sem LLM; trechos recuperados)\n\n{ctx}"
+        label = "(retrieval only; source excerpts)" if language == "en" else "(sem LLM; trechos recuperados)"
+        return f"{label}\n\n{ctx}"
     model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
     out = client.models.generate_content(model=model, contents=prompt)
     return (out.text or "").strip()
 
 
-def answer(query: str, retriever: str, no_llm: bool, k: int):
-    chunks = load_chunks()
+def answer(query: str, retriever: str, no_llm: bool, k: int, language: str = "pt"):
+    chunks = load_chunks(language)
     client = None if no_llm else gemini_client()
     hits = retrieve(query, chunks, retriever, gemini_client() if retriever == "embed" else client, k)
-    text = generate(query, hits, None if no_llm else client, retriever)
+    text = generate(query, hits, None if no_llm else client, retriever, language)
     return hits, text
 
 
@@ -171,9 +185,11 @@ def run_eval(retriever: str, no_llm: bool, k: int) -> None:
     n_src = 0
     n_ref = 0
     for case in cases:
-        hits, text = answer(case["q"], retriever, no_llm, k)
+        language = case.get("language", "pt")
+        hits, text = answer(case["q"], retriever, no_llm, k, language)
         sources = {h[1]["source"] for h in hits}
-        refused = text.strip().upper().startswith("RECUSA:")
+        refusal_prefix = "REFUSAL:" if language == "en" else "RECUSA:"
+        refused = text.strip().upper().startswith(refusal_prefix)
         if case["expect_refuse"]:
             n_ref += 1
             hit = refused or (hits[0][0] < min_score(retriever) if hits else True)
@@ -198,6 +214,7 @@ def main():
     p.add_argument("--eval", action="store_true")
     p.add_argument("--no-llm", action="store_true")
     p.add_argument("--retriever", choices=["tfidf", "embed"], default="tfidf")
+    p.add_argument("--language", choices=["pt", "en"], default="pt")
     p.add_argument("-k", type=int, default=TOP_K)
     args = p.parse_args()
     if args.eval:
@@ -206,7 +223,7 @@ def main():
     if not args.q:
         p.print_help()
         raise SystemExit(1)
-    hits, text = answer(args.q, args.retriever, args.no_llm, args.k)
+    hits, text = answer(args.q, args.retriever, args.no_llm, args.k, args.language)
     print(format_hits(hits))
     print("\n====\n")
     print(text)

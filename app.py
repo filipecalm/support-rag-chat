@@ -16,6 +16,7 @@ app = FastAPI(
 class AskRequest(BaseModel):
     q: str = Field(min_length=1, max_length=2000)
     retriever: str = Field(default="tfidf", pattern="^(tfidf|embed)$")
+    language: str = Field(default="pt", pattern="^(pt|en)$")
     no_llm: bool = False
     k: int = Field(default=3, ge=1, le=10)
 
@@ -31,6 +32,7 @@ class AskResponse(BaseModel):
     refused: bool
     hits: list[Hit]
     retriever: str
+    language: str
 
 
 @app.get("/api/health")
@@ -41,7 +43,7 @@ def health():
 @app.post("/api/ask", response_model=AskResponse)
 def ask(body: AskRequest):
     try:
-        hits, text = answer(body.q, body.retriever, body.no_llm, body.k)
+        hits, text = answer(body.q, body.retriever, body.no_llm, body.k, body.language)
     except SystemExit as exc:
         raise HTTPException(status_code=500, detail=str(exc) or "corpus error") from exc
     except Exception as exc:
@@ -49,7 +51,8 @@ def ask(body: AskRequest):
 
     floor = min_score(body.retriever)
     best = hits[0][0] if hits else 0.0
-    refused = text.strip().upper().startswith("RECUSA:") or best < floor
+    refusal_prefix = "REFUSAL:" if body.language == "en" else "RECUSA:"
+    refused = text.strip().upper().startswith(refusal_prefix) or best < floor
 
     return AskResponse(
         answer=text,
@@ -59,6 +62,7 @@ def ask(body: AskRequest):
             for score, ch in hits
         ],
         retriever=body.retriever,
+        language=body.language,
     )
 
 
@@ -108,6 +112,14 @@ HTML_PAGE = """<!DOCTYPE html>
       color: var(--fg);
       font: inherit;
     }
+    select {
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: 0.35rem;
+      background: #101a2c;
+      color: var(--fg);
+      font: inherit;
+    }
     .row { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; }
     label { font-size: 0.85rem; color: #9ab0c8; display: flex; gap: 0.4rem; align-items: center; }
     button {
@@ -145,12 +157,17 @@ HTML_PAGE = """<!DOCTYPE html>
 <body>
   <main>
     <h1>Support RAG Chat</h1>
-    <p class="lead">Answers only from the versioned corpus. Weak retrieval leads to explicit refusal.</p>
+    <p class="lead" id="lead"></p>
     <form id="f">
-      <textarea id="q" required placeholder="Ask something in the FAQ..."></textarea>
+      <textarea id="q" required></textarea>
       <div class="row">
-        <label><input type="checkbox" id="no_llm" /> retrieval only (--no-llm)</label>
-        <button type="submit" id="go">Ask</button>
+        <label for="language" id="language-label">Language</label>
+        <select id="language" aria-labelledby="language-label">
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+        </select>
+        <label><input type="checkbox" id="no_llm" /> <span id="retrieval-label"></span></label>
+        <button type="submit" id="go"></button>
       </div>
     </form>
     <p class="err" id="err" hidden></p>
@@ -166,6 +183,39 @@ HTML_PAGE = """<!DOCTYPE html>
     const answerEl = document.getElementById("answer");
     const hitsEl = document.getElementById("hits");
     const err = document.getElementById("err");
+    const languageEl = document.getElementById("language");
+    const copy = {
+      pt: {
+        lead: "Respostas baseadas apenas no corpus versionado. Se a busca for insuficiente, o chat recusa.",
+        placeholder: "Faça uma pergunta sobre a base de conhecimento...",
+        retrieval: "somente recuperação (sem LLM)",
+        ask: "Perguntar",
+        source: "Fonte",
+        error: "Erro",
+      },
+      en: {
+        lead: "Answers use only the versioned corpus. The chat refuses when retrieval is insufficient.",
+        placeholder: "Ask a question about the knowledge base...",
+        retrieval: "retrieval only (no LLM)",
+        ask: "Ask",
+        source: "Source",
+        error: "Error",
+      },
+    };
+
+    function updateLanguage() {
+      const language = languageEl.value;
+      const text = copy[language];
+      document.documentElement.lang = language === "pt" ? "pt-BR" : "en";
+      document.getElementById("lead").textContent = text.lead;
+      document.getElementById("q").placeholder = text.placeholder;
+      document.getElementById("language-label").textContent = language === "pt" ? "Idioma" : "Language";
+      document.getElementById("retrieval-label").textContent = text.retrieval;
+      go.textContent = text.ask;
+    }
+
+    languageEl.addEventListener("change", updateLanguage);
+    updateLanguage();
 
     f.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -179,6 +229,7 @@ HTML_PAGE = """<!DOCTYPE html>
             q: document.getElementById("q").value.trim(),
             no_llm: document.getElementById("no_llm").checked,
             retriever: "tfidf",
+            language: languageEl.value,
           }),
         });
         const data = await res.json();
@@ -186,11 +237,11 @@ HTML_PAGE = """<!DOCTYPE html>
         answerEl.textContent = data.answer;
         answerEl.classList.toggle("refuse", data.refused);
         hitsEl.innerHTML = data.hits.map((h) =>
-          `<article class="hit"><div class="meta">${h.source} · score ${h.score.toFixed(3)}</div>${escapeHtml(h.text)}</article>`
+          `<article class="hit"><div class="meta">${copy[languageEl.value].source}: ${h.source} · score ${h.score.toFixed(3)}</div>${escapeHtml(h.text)}</article>`
         ).join("");
         out.classList.add("visible");
       } catch (x) {
-        err.textContent = String(x.message || x);
+        err.textContent = `${copy[languageEl.value].error}: ${String(x.message || x)}`;
         err.hidden = false;
       } finally {
         go.disabled = false;

@@ -13,7 +13,7 @@ Not a generic ChatGPT wrapper. Answers only from a versioned knowledge base. If 
 | Run eval suite | Hit / refusal scores printed |
 
 Local UI: `uvicorn app:app --reload` → http://127.0.0.1:8000  
-API: `POST /api/ask` with `{ "q": "..." }`
+API: `POST /api/ask` with `{ "q": "...", "language": "en" }`. The language can be `pt` (default) or `en`.
 
 ## Stack
 
@@ -23,7 +23,7 @@ API: `POST /api/ask` with `{ "q": "..." }`
 | CLI | `ask.py` (same retrieval + eval) |
 | Retrieval | TF-IDF (default) or Gemini embeddings |
 | LLM | Gemini lab key (optional; `--no-llm` / `no_llm: true` still shows retrieval) |
-| Corpus | Markdown files under `corpus/` |
+| Corpus | Portuguese Markdown files under `corpus/`; English versions under `corpus/en/` |
 
 ## Architecture
 
@@ -48,6 +48,7 @@ copy .env.example .env
 
 python ask.py "Por que a dieta do DietOS não é RAG?"
 python ask.py --no-llm "Quem atualiza o Premium depois do pagamento?"
+python ask.py --no-llm --language en "Who updates Premium after payment?"
 python ask.py --eval --no-llm
 
 uvicorn app:app --reload
